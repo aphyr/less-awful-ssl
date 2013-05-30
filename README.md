@@ -52,7 +52,7 @@ socket:
 
 ```clj
 (use 'less-awful-ssl.core)
-(defn d [filename] (str "/path/to/keys/" filename))
+(def d (partial str "/path/to/keys/"))
 (apply test-ssl (map d ["client.pkcs8" "client.crt" "server.pkcs8" "server.crt" "demoCA/cacert.pem"]))
 ```
 
