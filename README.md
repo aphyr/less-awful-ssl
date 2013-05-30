@@ -112,6 +112,12 @@ socket. See `core.clj/test-ssl` for an example:
   ...)
 ```
 
+## Thanks
+
+I am indebted to Ben Linsay and Palomino Labs
+(http://blog.palominolabs.com/2011/10/18/java-2-way-tlsssl-client-certificates-and-pkcs12-vs-jks-keystores/)
+for their help in getting this all put together.
+
 ## License
 
 Copyright © 2013 Kyle Kingsbury (aphyr@aphyr.com)
