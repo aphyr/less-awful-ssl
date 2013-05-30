@@ -9,12 +9,12 @@ for creating TCPSockets directly, or handing off to Netty.
 
 ## Example
 
-In this example we'll be using openSSL's stock CA configuration and the openssl
+In this example we'll be using OpenSSL's stock CA configuration and the OpenSSL
 perl script to create a CA's directory structure. I'm assuming you want your CA
 signing key encrypted, but the client and server keys unencrypted (since
 they'll be deployed to processes which run without human interaction).
 
-```
+```bash
 # Create the CA directory hierarchy and keypair
 # http://kremvax.net/howto/ssl-openssl-ca.html
 cp /usr/lib/ssl/misc/CA.pl ca
@@ -84,7 +84,8 @@ trust chain, rather than the CA's:
 
 javax.net.ssl.SSLHandshakeException: null cert chain
 ...
-SSLHandshakeException Received fatal alert: bad_certificate  sun.security.ssl.Alerts.getSSLException (Alerts.java:192)
+SSLHandshakeException Received fatal alert: bad_certificate
+  sun.security.ssl.Alerts.getSSLException (Alerts.java:192)
 ```
 
 In your app, you'll want to distribute a particular PKCS secret key, the
@@ -96,20 +97,18 @@ peer's identity). Then you can build an SSLContext:
 ```
 
 And given an SSL context, you can use it to construct a server or a client TCP
-socket:
+socket. See `core.clj/test-ssl` for an example:
 
 ```clj
-(let [listener (server-socket (ssl-context "server.pkcs8" "server.crt" "ca.crt")
-                              "localhost"
-                              1234)
+(with-open [listener (-> (ssl-context "server.pkcs8" "server.crt" "ca.crt")
+                         (server-socket "localhost" 1234))
       conn (.accept sock)]
   ...)
 ```
 
 ```clj
-(let [sock (socket (ssl-context "client.pkcs8" "server.crt" "ca.crt")
-                   "localhost"
-                   1234)]
+(with-open [sock (-> (ssl-context "client.pkcs8" "server.crt" "ca.crt")
+                     (socket "localhost" 1234)]
   ...)
 ```
 
