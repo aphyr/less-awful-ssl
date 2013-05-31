@@ -7,6 +7,10 @@ less complicated to build simple SSL-enabled applications: given a CA
 certificate and a signed key and cert, it can give you an SSLContext suitable
 for creating TCPSockets directly, or handing off to Netty.
 
+## Installation
+
+https://clojars.org/less-awful-ssl
+
 ## Example
 
 In this example we'll be using OpenSSL's stock CA configuration and the OpenSSL
