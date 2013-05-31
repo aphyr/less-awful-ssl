@@ -67,7 +67,7 @@
     (re-find #"(?ms)^-----BEGIN ?.*? PRIVATE KEY-----$(.+)^-----END ?.*? PRIVATE KEY-----$")
     last
     base64->binary
-    (PKCS8EncodedKeySpec.)
+    PKCS8EncodedKeySpec.
     (.generatePrivate rsa-key-factory)))
 
 (defn key-pair
@@ -97,10 +97,6 @@
     (.load nil nil)
     (.setCertificateEntry "cacert" (load-certificate ca-cert-file))))
 
-(defn key-manager
-  "An X.509 key manager for a KeyStore."
-  [key-store])
-
 (defn trust-manager
   "An X.509 trust manager for a KeyStore."
   [key-store]
@@ -114,7 +110,7 @@
         first))))
 
 (defn key-manager
-  "An X.509 key maanger for a KeyStore."
+  "An X.509 key manager for a KeyStore."
   [key-store]
   (let [factory (KeyManagerFactory/getInstance "SunX509" "SunJSSE")]
     (locking factory
