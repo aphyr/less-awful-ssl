@@ -1,4 +1,4 @@
-(ns less-awful-ssl.core
+(ns less.awful.ssl
   "Interacting with the Java crypto APIs is one of the worst things you can do
   as a developer. I'm so sorry about all of this."
   (:use [clojure.java.io :only [input-stream reader file]]
