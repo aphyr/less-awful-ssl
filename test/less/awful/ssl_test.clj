@@ -1,6 +1,6 @@
-(ns less-awful-ssl.core-test
+(ns less.awful.ssl-test
   (:use clojure.test
-        less-awful-ssl.core))
+        less.awful.ssl))
 
 (deftest a-test
   (testing "FIXME, I fail."
