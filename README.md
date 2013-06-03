@@ -55,7 +55,7 @@ CA certificate, and verifies that a client can talk to the server over a TLS
 socket:
 
 ```clj
-(use 'less-awful-ssl.core)
+(use 'less.awful.ssl)
 (def d (partial str "/path/to/keys/"))
 (apply test-ssl (map d ["client.pkcs8" "client.crt" "server.pkcs8" "server.crt" "demoCA/cacert.pem"]))
 ```
