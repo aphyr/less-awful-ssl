@@ -19,6 +19,8 @@
            (java.security.spec PKCS8EncodedKeySpec)
            (java.net InetSocketAddress)
            (javax.net.ssl SSLContext
+                          SSLSocket
+                          SSLServerSocket
                           SSLServerSocketFactory
                           SSLSocketFactory
                           KeyManager
@@ -34,11 +36,11 @@
   [string]
   (DatatypeConverter/parseBase64Binary string))
 
-(def x509-cert-factory
+(def ^CertificateFactory x509-cert-factory
   "The X.509 certificate factory"
   (CertificateFactory/getInstance "X.509"))
 
-(def rsa-key-factory
+(def ^KeyFactory rsa-key-factory
   "An RSA key factory"
   (KeyFactory/getInstance "RSA"))
 
@@ -47,7 +49,7 @@
   stored in memory."
   (char-array "GheesBetDyPhuvwotNolofamLydMues9"))
 
-(defn load-certificate
+(defn ^Certificate load-certificate
   "Loads an X.509 certificate from a file."
   [file]
   (with-open [stream (input-stream file)]
@@ -99,7 +101,7 @@
 
 (defn trust-manager
   "An X.509 trust manager for a KeyStore."
-  [key-store]
+  [^KeyStore key-store]
   (let [factory (TrustManagerFactory/getInstance "PKIX" "SunJSSE")]
     ; I'm concerned that getInstance might return the *same* factory each time,
     ; so we'll defensively lock before mutating here:
@@ -141,21 +143,25 @@
   "An array of protocols we support."
   (into-array String ["TLSv1"]))
 
-(defn server-socket
+(defn ^SSLServerSocket server-socket
   "Given an SSL context, makes a server SSLSocket."
-  [context host port]
-  (doto (.. context getServerSocketFactory createServerSocket)
-    (.bind (InetSocketAddress. host port))
-    (.setNeedClientAuth true)
-    (.setEnabledProtocols enabled-protocols)))
+  [^SSLContext context ^String host port]
+  (let [^SSLServerSocket sock (.. context
+                               getServerSocketFactory
+                               createServerSocket)]
+    (doto sock
+      (.bind (InetSocketAddress. host ^int port))
+      (.setNeedClientAuth true)
+      (.setEnabledProtocols enabled-protocols))))
 
-(defn socket
+(defn ^SSLSocket socket
   "Given an SSL context, makes a client SSLSocket."
-  [context host port]
-  (doto (-> context
-          .getSocketFactory
-          (.createSocket host port))
-    (.setEnabledProtocols enabled-protocols)))
+  [^SSLContext context ^String host port]
+  (let [^SSLSocket sock (-> context
+                            .getSocketFactory
+                            (.createSocket host ^int port))]
+    (.setEnabledProtocols sock enabled-protocols)
+    sock))
 
 (defn test-ssl
   "Given keys and certificates for a client and server, and the signing CA for
