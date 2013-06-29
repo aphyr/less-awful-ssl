@@ -1,4 +1,4 @@
-(defproject less-awful-ssl "0.1.1-SNAPSHOT"
+(defproject less-awful-ssl "0.1.1"
   :description "Get an SSLContext without wanting to rip your hair out."
   :url "http://github.com/aphyr/less-awful-ssl"
   :license {:name "Eclipse Public License"
