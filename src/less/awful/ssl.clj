@@ -80,16 +80,14 @@
 (defn key-store
   "Makes a keystore from a PKCS8 private key file, a public cert file, and the
   signing CA certificate."
-  [key-file cert-file ca-cert-file]
+  [key-file cert-file]
   (let [key     (private-key key-file)
-        cert    (load-certificate cert-file)
-        ca-cert (load-certificate ca-cert-file)]
+        cert    (load-certificate cert-file)]
     (doto (KeyStore/getInstance (KeyStore/getDefaultType))
       (.load nil nil)
       ; alias, private key, password, certificate chain
       (.setKeyEntry "cert" key key-store-password
                     (into-array Certificate [cert])))))
-;      (.setCertificateEntry "cacert" ca-cert))))
 
 (defn trust-store
   "Makes a trust store, suitable for backing a TrustManager, out of a CA cert
@@ -125,7 +123,7 @@
   "Returns a function that yields SSL contexts. Takes a PKCS8 key file, a
   certificate file, and a trusted CA certificate used to verify peers."
   [key-file cert-file ca-cert-file]
-  (let [key-manager   (key-manager (key-store key-file cert-file ca-cert-file))
+  (let [key-manager   (key-manager (key-store key-file cert-file))
         trust-manager (trust-manager (trust-store ca-cert-file))]
     (fn build-context []
       (doto (SSLContext/getInstance "TLS")
@@ -141,7 +139,7 @@
 
 (def enabled-protocols
   "An array of protocols we support."
-  (into-array String ["TLSv1"]))
+  (into-array String ["TLSv1.2" "TLSv1.1" "TLSv1"]))
 
 (defn ^SSLServerSocket server-socket
   "Given an SSL context, makes a server SSLSocket."
