@@ -111,13 +111,16 @@
 
 (defn key-manager
   "An X.509 key manager for a KeyStore."
-  [key-store]
-  (let [factory (KeyManagerFactory/getInstance "SunX509" "SunJSSE")]
-    (locking factory
-      (->> (doto factory (.init key-store, key-store-password))
-        .getKeyManagers
-        (filter (partial instance? X509KeyManager))
-        first))))
+  ([key-store password]
+   (let [factory (KeyManagerFactory/getInstance "SunX509" "SunJSSE")]
+     (locking factory
+       (->> (doto factory (.init key-store, password))
+            .getKeyManagers
+            (filter (partial instance? X509KeyManager))
+            first))))
+  ([key-store]
+   (key-manager key-store key-store-password))  )
+
 
 (defn ssl-context-generator
   "Returns a function that yields SSL contexts. Takes a PKCS8 key file, a
@@ -136,6 +139,32 @@
   used to verify peers, returns an SSLContext."
   [key-file cert-file ca-cert-file]
   ((ssl-context-generator key-file cert-file ca-cert-file)))
+
+(defn ssl-p12-context-generator
+      "Returns a function that yields an SSL contexts. Takes a PKCS12 key/cert file, the
+      password for the PKCS12 file, and a CA certificate that was used to sign the PKCS12."
+      [p12 password ca-cert-file]
+      (let [fin (FileInputStream. ^String p12)
+            ks (KeyStore/getInstance "PKCS12")]
+           (fn build-context []
+               (.load ks fin password)
+               (let [km (key-manager ks password)
+                     tm (trust-manager (trust-store ca-cert-file))]
+                    (doto (SSLContext/getInstance "TLS")
+                          (.init (into-array KeyManager [km])
+                                 (into-array TrustManager [tm])
+                                 nil))))))
+
+(defn ssl-p12-context
+      "Given a PKCS12 key/cert file, the password, and a CA certificate that was used
+      to sign the PKCS12, return an SSL Context"
+      [p12 password ca-cert-file]
+      ((ssl-p12-context-generator p12 password ca-cert-file)))
+
+(defn ssl-context->engine
+  [ctx]
+  (.createSSLEngine ^SSLContext ctx)
+  )
 
 (def enabled-protocols
   "An array of protocols we support."
