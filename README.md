@@ -116,6 +116,24 @@ socket. See `core.clj/test-ssl` for an example:
   ...)
 ```
 
+## Example with a PKCS12 client certificate and org.httpkit
+
+Assume you've got a client key/certificate pair for `example.com` as a PKCS12 file `client.p12`, 
+secured with _password_. Also, you've got the Certificate Autority that was used to 
+sign the client certificate as `ca-cert.crt`.
+
+Then you could do (your project needs http-kit, of course):
+
+```clj
+(use 'less.awful.ssl)
+(require '[org.httpkit.client :as http])
+
+(def password (char-array "secret"))
+
+(def req (http/request {:sslengine (ssl-context->engine (ssl-p12-context "client.p12" password "ca-cert.crt"))
+                        :url "https://example.com/needs-client-cert" :as :stream}))
+```
+
 ## Thanks
 
 I am indebted to Ben Linsay and Palomino Labs
