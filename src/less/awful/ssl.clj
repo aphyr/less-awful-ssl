@@ -55,6 +55,12 @@
   (with-open [stream (input-stream file)]
     (.generateCertificate x509-cert-factory stream)))
 
+(defn ^"[Ljava.security.cert.Certificate;" load-certificate-chain
+  "Loads an X.509 certificate chain from a file."
+  [file]
+  (with-open [stream (input-stream file)]
+    (.toArray (.generateCertificates x509-cert-factory stream) (make-array Certificate 0))))
+
 (defn public-key
   "Loads a public key from a .crt file."
   [file]
@@ -82,12 +88,11 @@
   signing CA certificate."
   [key-file cert-file]
   (let [key     (private-key key-file)
-        cert    (load-certificate cert-file)]
+        certs   (load-certificate-chain cert-file)]
     (doto (KeyStore/getInstance (KeyStore/getDefaultType))
       (.load nil nil)
       ; alias, private key, password, certificate chain
-      (.setKeyEntry "cert" key key-store-password
-                    (into-array Certificate [cert])))))
+      (.setKeyEntry "cert" key key-store-password certs))))
 
 (defn trust-store
   "Makes a trust store, suitable for backing a TrustManager, out of a CA cert
@@ -199,7 +204,7 @@
 
   (let [port (+ 1024 (int (rand 60000)))
         started (promise)
-        
+
         ; A dumb echo server
         server
         (future
@@ -228,7 +233,7 @@
                 (prn :server-done)))
             (catch Throwable t
               (clojure.stacktrace/print-stack-trace t))))]
-   
+
     @started
 
     ; Connect to the local server, send some text, and verify it came back
