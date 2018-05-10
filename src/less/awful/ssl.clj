@@ -28,13 +28,15 @@
                           TrustManager
                           TrustManagerFactory
                           X509KeyManager
-                          X509TrustManager)
-           (javax.xml.bind DatatypeConverter)))
+                          X509TrustManager)))
 
-(defn base64->binary
-  "Parses a base64-encoded string to a byte array"
-  [string]
-  (DatatypeConverter/parseBase64Binary string))
+(defmacro base64->binary [string]
+  (if (try (import 'java.util.Base64)
+           (catch ClassNotFoundException _))
+    `(.decode (java.util.Base64/getMimeDecoder) ~string)
+    (do
+      (import 'javax.xml.bind.DatatypeConverter)
+      `(javax.xml.bind.DatatypeConverter/parseBase64Binary ~string))))
 
 (def ^CertificateFactory x509-cert-factory
   "The X.509 certificate factory"
