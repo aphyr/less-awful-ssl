@@ -151,7 +151,7 @@
       "Returns a function that yields an SSL contexts. Takes a PKCS12 key/cert file, the
       password for the PKCS12 file, and a CA certificate that was used to sign the PKCS12."
       [p12 password ca-cert-file]
-      (let [fin (FileInputStream. ^String p12)
+      (let [fin (input-stream p12)
             ks (KeyStore/getInstance "PKCS12")]
            (fn build-context []
                (.load ks fin password)
