@@ -132,20 +132,29 @@
 (defn ssl-context-generator
   "Returns a function that yields SSL contexts. Takes a PKCS8 key file, a
   certificate file, and a trusted CA certificate used to verify peers."
-  [key-file cert-file ca-cert-file]
-  (let [key-manager   (key-manager (key-store key-file cert-file))
-        trust-manager (trust-manager (trust-store ca-cert-file))]
-    (fn build-context []
-      (doto (SSLContext/getInstance "TLS")
-        (.init (into-array KeyManager [key-manager])
-               (into-array TrustManager [trust-manager])
-               nil)))))
+  ([key-file cert-file ca-cert-file]
+   (let [key-manager (key-manager (key-store key-file cert-file))
+         trust-manager (trust-manager (trust-store ca-cert-file))]
+     (fn build-context []
+       (doto (SSLContext/getInstance "TLS")
+         (.init (into-array KeyManager [key-manager])
+                (into-array TrustManager [trust-manager])
+                nil)))))
+  ([key-file cert-file]
+   (let [key-manager (key-manager (key-store key-file cert-file))]
+     (fn build-context []
+       (doto (SSLContext/getInstance "TLS")
+         (.init (into-array KeyManager [key-manager])
+                nil
+                nil))))))
 
 (defn ssl-context
   "Given a PKCS8 key file, a certificate file, and a trusted CA certificate
   used to verify peers, returns an SSLContext."
-  [key-file cert-file ca-cert-file]
-  ((ssl-context-generator key-file cert-file ca-cert-file)))
+  ([key-file cert-file ca-cert-file]
+   ((ssl-context-generator key-file cert-file ca-cert-file)))
+  ([key-file cert-file]
+   ((ssl-context-generator key-file cert-file))))
 
 (defn ssl-p12-context-generator
       "Returns a function that yields an SSL contexts. Takes a PKCS12 key/cert file, the
