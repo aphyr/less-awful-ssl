@@ -33,7 +33,8 @@
 (defmacro base64->binary [string]
   (if (try (import 'java.util.Base64)
            (catch ClassNotFoundException _))
-    `(.decode (java.util.Base64/getMimeDecoder) ~string)
+    `(let [^String s# ~string]
+       (.decode (java.util.Base64/getMimeDecoder) s#))
     (do
       (import 'javax.xml.bind.DatatypeConverter)
       `(javax.xml.bind.DatatypeConverter/parseBase64Binary ~string))))
@@ -61,7 +62,8 @@
   "Loads an X.509 certificate chain from a file."
   [file]
   (with-open [stream (input-stream file)]
-    (.toArray (.generateCertificates x509-cert-factory stream) (make-array Certificate 0))))
+    (let [^"[Ljava.security.cert.Certificate;" ar (make-array Certificate 0)]
+      (.toArray (.generateCertificates x509-cert-factory stream) ar))))
 
 (defn public-key
   "Loads a public key from a .crt file."
