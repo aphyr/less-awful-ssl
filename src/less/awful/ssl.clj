@@ -138,14 +138,14 @@
    (let [key-manager (key-manager (key-store key-file cert-file))
          trust-manager (trust-manager (trust-store ca-cert-file))]
      (fn build-context []
-       (doto (SSLContext/getInstance "TLS")
+       (doto (SSLContext/getInstance "TLSv1.2")
          (.init (into-array KeyManager [key-manager])
                 (into-array TrustManager [trust-manager])
                 nil)))))
   ([key-file cert-file]
    (let [key-manager (key-manager (key-store key-file cert-file))]
      (fn build-context []
-       (doto (SSLContext/getInstance "TLS")
+       (doto (SSLContext/getInstance "TLSv1.2")
          (.init (into-array KeyManager [key-manager])
                 nil
                 nil))))))
@@ -168,7 +168,7 @@
                (.load ks fin password)
                (let [km (key-manager ks password)
                      tm (trust-manager (trust-store ca-cert-file))]
-                    (doto (SSLContext/getInstance "TLS")
+                    (doto (SSLContext/getInstance "TLSv1.2")
                           (.init (into-array KeyManager [km])
                                  (into-array TrustManager [tm])
                                  nil))))))
