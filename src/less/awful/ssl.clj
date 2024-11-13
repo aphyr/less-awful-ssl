@@ -133,7 +133,8 @@
 
 (defn ssl-context-generator
   "Returns a function that yields SSL contexts. Takes a PKCS8 key file, a
-  certificate file, and optionally, a trusted CA certificate used to verify peers."
+  certificate file, and optionally, a trusted CA certificate used to verify peers.
+  The arity-1 body accepts a trusted CA certificate only."
   ([key-file cert-file ca-cert-file]
    (let [key-manager (key-manager (key-store key-file cert-file))
          trust-manager (trust-manager (trust-store ca-cert-file))]
@@ -159,7 +160,8 @@
 
 (defn ssl-context
   "Given a PKCS8 key file, a certificate file, and optionally, a trusted CA certificate
-  used to verify peers, returns an SSLContext."
+  used to verify peers, returns an SSLContext. The arity-1 body accepts a single trusted
+  CA certificate which is commonly used to reach databases."
   (^SSLContext [key-file cert-file ca-cert-file]
    ((ssl-context-generator key-file cert-file ca-cert-file)))
   (^SSLContext [key-file cert-file]
