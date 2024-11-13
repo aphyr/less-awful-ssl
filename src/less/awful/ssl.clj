@@ -128,12 +128,13 @@
             (filter (partial instance? X509KeyManager))
             first))))
   ([key-store]
-   (key-manager key-store key-store-password))  )
+   (key-manager key-store key-store-password)))
 
 
 (defn ssl-context-generator
   "Returns a function that yields SSL contexts. Takes a PKCS8 key file, a
-  certificate file, and optionally, a trusted CA certificate used to verify peers."
+  certificate file, and optionally, a trusted CA certificate used to verify peers.
+  The arity-1 body accepts a trusted CA certificate only."
   ([key-file cert-file ca-cert-file]
    (let [key-manager (key-manager (key-store key-file cert-file))
          trust-manager (trust-manager (trust-store ca-cert-file))]
@@ -148,15 +149,25 @@
        (doto (SSLContext/getInstance "TLSv1.2")
          (.init (into-array KeyManager [key-manager])
                 nil
+                nil)))))
+  ([ca-cert-file]
+   (let [trust-manager (trust-manager (trust-store ca-cert-file))]
+     (fn build-context []
+       (doto (SSLContext/getInstance "TLSv1.2")
+         (.init nil
+                (into-array TrustManager [trust-manager])
                 nil))))))
 
 (defn ssl-context
   "Given a PKCS8 key file, a certificate file, and optionally, a trusted CA certificate
-  used to verify peers, returns an SSLContext."
-  ([key-file cert-file ca-cert-file]
+  used to verify peers, returns an SSLContext. The arity-1 body accepts a single trusted
+  CA certificate which is commonly used to reach databases."
+  (^SSLContext [key-file cert-file ca-cert-file]
    ((ssl-context-generator key-file cert-file ca-cert-file)))
-  ([key-file cert-file]
-   ((ssl-context-generator key-file cert-file))))
+  (^SSLContext [key-file cert-file]
+   ((ssl-context-generator key-file cert-file)))
+  (^SSLContext [ca-cert-file]
+   ((ssl-context-generator ca-cert-file))))
 
 (defn ssl-p12-context-generator
       "Returns a function that yields an SSL contexts. Takes a PKCS12 key/cert file, the
@@ -181,8 +192,7 @@
 
 (defn ssl-context->engine
   [ctx]
-  (.createSSLEngine ^SSLContext ctx)
-  )
+  (.createSSLEngine ^SSLContext ctx))
 
 (def enabled-protocols
   "An array of protocols we support."
