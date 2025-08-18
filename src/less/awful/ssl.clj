@@ -30,6 +30,8 @@
                           X509KeyManager
                           X509TrustManager)))
 
+(set! *warn-on-reflection* true)
+
 (defmacro base64->binary [string]
   (if (try (import 'java.util.Base64)
            (catch ClassNotFoundException _))
@@ -284,3 +286,32 @@
 
     (prn :waiting-for-server)
     @server))
+
+(defn dummy-trust-manager
+  "
+  Make a dummy TrustManager that doesn't validate
+  any certificates.
+  "
+  ^X509TrustManager []
+  (reify X509TrustManager
+    (getAcceptedIssuers [_this]
+      nil)
+    (checkClientTrusted [_this _certs _auth]
+      nil)
+    (checkServerTrusted [_this _certs _auth]
+      nil)))
+
+(defn dummy-ssl-context
+  "
+  Produce a dummy SSLContext instance that doesn't
+  validate any certificates. The protocol, when not
+  specified, is TLS.
+  "
+  (^SSLContext []
+   (dummy-ssl-context "TLS"))
+
+  (^SSLContext [^String protocol]
+   (let [trust-managers (into-array TrustManager [(dummy-trust-manager)])
+         ctx (SSLContext/getInstance protocol)]
+     (.init ctx nil trust-managers nil)
+     ctx)))

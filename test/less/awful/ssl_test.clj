@@ -1,7 +1,8 @@
 (ns less.awful.ssl-test
   (:require [clojure.test :refer :all]
             [less.awful.ssl :as ssl])
-  (:import (java.nio.charset StandardCharsets)))
+  (:import (java.nio.charset StandardCharsets)
+           (javax.net.ssl SSLContext)))
 
 (deftest base64
   (let [test-str (apply str (repeat 4 "less-awful-ssl"))]
@@ -13,3 +14,7 @@
       (is (= test-str
              (-> (ssl/base64->binary "bGVzcy1hd2Z1bC1zc2xsZXNzLWF3ZnVsLXNzbGxlc3MtYXdmdWwtc3NsbGVzcy1hd2Z1bC1zc2w=")
                  (String. StandardCharsets/UTF_8)))))))
+
+(deftest test-ssl-dummy
+  (let [ssl-context (ssl/dummy-ssl-context)]
+    (is (instance? SSLContext ssl-context))))

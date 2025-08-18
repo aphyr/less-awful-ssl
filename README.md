@@ -118,8 +118,8 @@ socket. See `core.clj/test-ssl` for an example:
 
 ## Example with a PKCS12 client certificate and org.httpkit
 
-Assume you've got a client key/certificate pair for `example.com` as a PKCS12 file `client.p12`, 
-secured with _password_. Also, you've got the Certificate Autority that was used to 
+Assume you've got a client key/certificate pair for `example.com` as a PKCS12 file `client.p12`,
+secured with _password_. Also, you've got the Certificate Autority that was used to
 sign the client certificate as `ca-cert.crt`.
 
 Then you could do (your project needs http-kit, of course):
@@ -133,6 +133,23 @@ Then you could do (your project needs http-kit, of course):
 (def req (http/request {:sslengine (ssl-context->engine (ssl-p12-context "client.p12" password "ca-cert.crt"))
                         :url "https://example.com/needs-client-cert" :as :stream}))
 ```
+
+## Dummy SSL Context
+
+In rare cases you need an SSL context which, in fact, validates nothing: nor
+server certificates nor client ones. Crafting such an `SSLContext` object always
+takes lines of code but now there is a shortcut for that. A small example:
+
+~~~clojure
+(let [ssl-context (ssl/dummy-ssl-context)
+      client (http/build-client {:ssl-context ssl-context})]
+  (http/get "https://acme.api.example.com/users/42" {:client client}))
+~~~
+
+Above, we reach the URL using a custom version of an HTTP client. This client
+won't throw an exception when missing local certificates. Of course, this
+technique should not be a common practice. Use if for tests, self-signed
+certificates, or when you really know what are you doing.
 
 ## Thanks
 
