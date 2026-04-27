@@ -139,21 +139,21 @@
    (let [key-manager (key-manager (key-store key-file cert-file))
          trust-manager (trust-manager (trust-store ca-cert-file))]
      (fn build-context []
-       (doto (SSLContext/getInstance "TLSv1.2")
+       (doto (SSLContext/getInstance "TLSv1.3")
          (.init (into-array KeyManager [key-manager])
                 (into-array TrustManager [trust-manager])
                 nil)))))
   ([key-file cert-file]
    (let [key-manager (key-manager (key-store key-file cert-file))]
      (fn build-context []
-       (doto (SSLContext/getInstance "TLSv1.2")
+       (doto (SSLContext/getInstance "TLSv1.3")
          (.init (into-array KeyManager [key-manager])
                 nil
                 nil)))))
   ([ca-cert-file]
    (let [trust-manager (trust-manager (trust-store ca-cert-file))]
      (fn build-context []
-       (doto (SSLContext/getInstance "TLSv1.2")
+       (doto (SSLContext/getInstance "TLSv1.3")
          (.init nil
                 (into-array TrustManager [trust-manager])
                 nil))))))
@@ -196,7 +196,7 @@
 
 (def enabled-protocols
   "An array of protocols we support."
-  (into-array String ["TLSv1.2" "TLSv1.1" "TLSv1"]))
+  (into-array String ["TLSv1.3" "TLSv1.2" "TLSv1.1" "TLSv1"]))
 
 (defn ^SSLServerSocket server-socket
   "Given an SSL context, makes a server SSLSocket."
